@@ -1,4 +1,5 @@
-import { Row, Col, Select, Button, Popover, Table } from "@douyinfe/semi-ui";
+import { useState } from "react";
+import { Row, Col, Select, Button, Popover, Table, Input } from "@douyinfe/semi-ui";
 import {
   IconDeleteStroked,
   IconLoopTextStroked,
@@ -29,6 +30,7 @@ export default function RelationshipInfo({ data }) {
   const { setUndoStack, setRedoStack } = useUndoRedo();
   const { tables, setRelationships, deleteRelationship } = useDiagram();
   const { t } = useTranslation();
+  const [editField, setEditField] = useState({});
 
   const swapKeys = () => {
     setUndoStack((prev) => [
@@ -70,6 +72,29 @@ export default function RelationshipInfo({ data }) {
               endFieldId: e.startFieldId,
             }
           : e,
+      ),
+    );
+  };
+
+  const changeName = (value) => {
+    setUndoStack((prev) => [
+      ...prev,
+      {
+        action: Action.EDIT,
+        element: ObjectType.RELATIONSHIP,
+        rid: data.id,
+        undo: { name: data.name },
+        redo: { name: value },
+        message: t("edit_relationship", {
+          refName: data.name,
+          extra: "[name]",
+        }),
+      },
+    ]);
+    setRedoStack([]);
+    setRelationships((prev) =>
+      prev.map((e, idx) =>
+        idx === data.id ? { ...e, name: value } : e,
       ),
     );
   };
@@ -121,6 +146,35 @@ export default function RelationshipInfo({ data }) {
 
   return (
     <>
+      <div className="flex items-center mb-2.5">
+        <div className="text-md font-semibold break-keep">{t("name")}: </div>
+        <Input
+          value={data.name}
+          validateStatus={data.name.trim() === "" ? "error" : "default"}
+          placeholder={t("name")}
+          className="ms-2"
+          onChange={changeName}
+          onFocus={(e) => setEditField({ name: e.target.value })}
+          onBlur={(e) => {
+            if (e.target.value === editField.name) return;
+            setUndoStack((prev) => [
+              ...prev,
+              {
+                action: Action.EDIT,
+                element: ObjectType.RELATIONSHIP,
+                rid: data.id,
+                undo: editField,
+                redo: { name: e.target.value },
+                message: t("edit_relationship", {
+                  refName: data.name,
+                  extra: "[name]",
+                }),
+              },
+            ]);
+            setRedoStack([]);
+          }}
+        />
+      </div>
       <div className="flex justify-between items-center mb-3">
         <div className="me-3">
           <span className="font-semibold">{t("primary")}: </span>
