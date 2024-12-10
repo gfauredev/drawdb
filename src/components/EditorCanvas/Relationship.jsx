@@ -124,6 +124,27 @@ export default function Relationship({ data }) {
             >
               {cardinalityStart}
             </text>
+          </>
+        )}
+        {pathRef.current && settings.showCardinality && true && (
+          // TODO replace above true: relationship name is different than default one
+          // TODO improve placement
+          // TODO improve style
+          <>
+            <text
+              x={cardinalityEndX - (cardinalityEndX - cardinalityStartX)/2}
+              y={cardinalityEndY - (cardinalityEndY - cardinalityStartY)/2}
+              fill="black"
+              strokeWidth="0.5"
+              textAnchor="middle"
+              alignmentBaseline="middle"
+            >
+              {data.name}
+            </text>
+          </>
+        )}
+        {pathRef.current && settings.showCardinality && (
+          <>
             <circle
               cx={cardinalityEndX}
               cy={cardinalityEndY}
